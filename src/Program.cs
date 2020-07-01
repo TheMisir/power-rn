@@ -39,9 +39,10 @@ namespace powertoys
 
             if (options.Editor == "editor.bat" && Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                options.Editor = "./editor.sh";
+                options.Editor = "editor.sh";
             }
 
+            // Search for files
             string path = Path.GetTempFileName();
             string[] oldNames = Directory.GetFiles(options.Directory, options.Files, new EnumerationOptions
             {
@@ -51,9 +52,11 @@ namespace powertoys
                 RecurseSubdirectories = options.Recursive,
             });
 
+            // Write file names to the created temporary file
             File.WriteAllLines(path, oldNames);
             DateTime lastWrite = File.GetLastWriteTimeUtc(path);
 
+            // Launch editor and wait for exit
             using Process editor = Process.Start(options.Editor, path);
             editor.WaitForExit();
 
@@ -70,6 +73,9 @@ namespace powertoys
             }
 
             string[] newNames = File.ReadAllLines(path);
+
+            // Clean up
+            File.Delete(path);
 
             if (newNames.Length != oldNames.Length)
             {
